@@ -1,0 +1,12 @@
+// backend: services/emailService.js (new file)
+// Placeholder until Boubyan confirms SMTP details — logs what WOULD be
+// sent, doesn't actually send anything. Swap the body of this function
+// for real nodemailer/SMTP code once credentials are confirmed.
+
+async function sendConfirmationEmail({ to, name, sessionTitle }) {
+  console.log(`[EMAIL - NOT SENT] Would send confirmation to ${to} (${name}) for "${sessionTitle}"`);
+  // TODO: replace with real SMTP once Boubyan confirms credentials
+  return { sent: false, reason: 'SMTP not yet configured' };
+}
+
+module.exports = { sendConfirmationEmail };

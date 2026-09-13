@@ -1,0 +1,51 @@
+import { motion } from 'motion/react';
+import { useLanguage } from '../context/LanguageContext';
+import Button from './Button';
+
+export default function SpeakerBanner({ session, onRegister }) {
+  const { t, language } = useLanguage();
+
+  const title = language === 'ar' && session.title_ar ? session.title_ar : session.title;
+  const description = language === 'ar' && session.description_ar ? session.description_ar : session.description;
+  const displayName = (language === 'ar' && session.speaker_name_ar ? session.speaker_name_ar : session.speaker_name) || session.host || 'Guest Speaker';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      className="overflow-hidden rounded-2xl border border-neutral-200 bg-white"
+    >
+      <div className="flex flex-col gap-6 p-6 md:flex-row md:items-center md:p-8">
+        <div className="flex-shrink-0">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-brand-red to-brand-red-dark text-lg font-bold text-white">
+            {displayName.split(' ').map((w) => w[0]).slice(0, 2).join('')}
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <p className="text-xs font-bold uppercase tracking-wide text-brand-red">{displayName}</p>
+          <h3 className="mt-1 text-lg font-bold text-brand-ink">{title}</h3>
+          <p className="mt-2 text-sm text-brand-muted">{description}</p>
+
+          <div className="mt-4 flex flex-wrap gap-4 text-xs text-brand-muted">
+            <span>⏱ {session.duration_minutes || 90} {t('speaker.minutes')}</span>
+            <span>{session.format === 'online' ? '💻' : '📍'} {session.format === 'online' ? t('speaker.online') : t('speaker.inPerson')}</span>
+            <span>✓ {t('speaker.registrationRequired')}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-shrink-0 flex-col items-stretch gap-2 md:items-end">
+          {session.seats_limited === 1 && (
+            <span className="rounded-full bg-amber-50 px-3 py-1 text-center text-[11px] font-bold text-amber-700">
+              {t('speaker.limitedSeating')}
+            </span>
+          )}
+          <Button variant="primary" onClick={() => onRegister(session.id)}>
+            {t('speaker.registerNow')}
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}

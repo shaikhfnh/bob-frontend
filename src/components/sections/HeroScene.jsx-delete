@@ -1,0 +1,88 @@
+import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'motion/react';
+
+function useParallaxLayer(mouseX, mouseY, depth) {
+  const x = useTransform(mouseX, (v) => v * depth);
+  const y = useTransform(mouseY, (v) => v * depth);
+  return { x, y };
+}
+
+export default function HeroScene() {
+  const reduceMotion = useReducedMotion();
+
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+  const mouseX = useSpring(rawX, { stiffness: 150, damping: 20 });
+  const mouseY = useSpring(rawY, { stiffness: 150, damping: 20 });
+
+  function handleMouseMove(e) {
+    if (reduceMotion) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    rawX.set(px * 24);
+    rawY.set(py * 24);
+  }
+  function handleMouseLeave() {
+    rawX.set(0);
+    rawY.set(0);
+  }
+
+  const blob = useParallaxLayer(mouseX, mouseY, 0.3);
+  const house = useParallaxLayer(mouseX, mouseY, 0.6);
+  const doc = useParallaxLayer(mouseX, mouseY, 1.1);
+  const coins = useParallaxLayer(mouseX, mouseY, 1.4);
+
+  const idleFloat = (duration, delay = 0) =>
+    reduceMotion ? {} : { animate: { y: [0, -10, 0] }, transition: { duration, repeat: Infinity, ease: 'easeInOut', delay } };
+
+  return (
+    <div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative aspect-square w-full max-w-lg"
+    >
+      <motion.div style={blob} className="absolute inset-8 rounded-full bg-gradient-to-br from-red-50 to-neutral-50" />
+
+      {/* house now has its OWN continuous ambient sway, independent of the cursor —
+          this is the "moving without the cursor" part; parallax adds on top of it */}
+      <motion.div
+        style={house}
+        animate={reduceMotion ? {} : { rotate: [-1.5, 1.5, -1.5] }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute inset-0 flex items-end justify-center pb-16"
+      >
+        <div className="relative">
+          <div
+            className="mx-auto h-0 w-0"
+            style={{ borderLeft: '78px solid transparent', borderRight: '78px solid transparent', borderBottom: '66px solid var(--color-brand-red)' }}
+          />
+          <div className="relative mx-auto h-32 w-36 rounded-b-sm bg-neutral-300">
+            <div className="absolute bottom-0 left-1/2 h-16 w-10 -translate-x-1/2 rounded-t-md bg-brand-ink" />
+            <div className="absolute left-3.5 top-5 h-6 w-6 rounded-sm bg-white/70" />
+            <div className="absolute right-3.5 top-5 h-6 w-6 rounded-sm bg-white/70" />
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div style={doc} {...idleFloat(3.2)} className="absolute left-2 top-8 h-16 w-12 rounded-lg bg-white p-2 shadow-lg">
+        <div className="h-1.5 w-full rounded-full bg-neutral-200" />
+        <div className="mt-1.5 h-1.5 w-3/4 rounded-full bg-neutral-200" />
+        <div className="mt-1.5 h-1.5 w-full rounded-full bg-neutral-200" />
+      </motion.div>
+
+      <motion.div style={coins} {...idleFloat(2.6, 0.4)} className="absolute bottom-16 right-4 h-9 w-9 rounded-full bg-yellow-400 shadow-md" />
+      <motion.div style={coins} {...idleFloat(2.9, 0.8)} className="absolute bottom-10 right-14 h-6 w-6 rounded-full bg-yellow-300 shadow-md" />
+
+      <motion.div
+        drag
+        dragElastic={0.4}
+        dragSnapToOrigin
+        whileDrag={{ scale: 1.15, cursor: 'grabbing' }}
+        className="absolute right-8 top-6 flex h-11 w-11 cursor-grab items-center justify-center rounded-full bg-brand-red text-white shadow-lg active:cursor-grabbing"
+        aria-label="Drag the key"
+      >
+        🔑
+      </motion.div>
+    </div>
+  );
+}

@@ -1,0 +1,26 @@
+import { motion } from 'motion/react';
+import { springs } from '../styles/motion';
+
+export default function HostBadge({ name = 'Sara Al-Fahad', role = 'Head of Sakan Financing', initials = 'SA' }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ ...springs.default, delay: 0.35 }}
+      className="inline-flex items-center gap-3 rounded-full bg-white/80 py-2 pl-2 pr-5 shadow-sm backdrop-blur-md"
+    >
+      {/*
+        Placeholder avatar — works immediately, no file needed.
+        Swap for a real photo later:
+          <img src={saraPhoto} alt={name} className="h-14 w-14 rounded-full object-cover" />
+      */}
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand-red to-brand-red-dark text-lg font-bold text-white ring-4 ring-white">
+        {initials}
+      </div>
+      <div>
+        <p className="text-sm font-bold text-brand-ink">{name}</p>
+        <p className="text-xs text-brand-muted">{role}</p>
+      </div>
+    </motion.div>
+  );
+}

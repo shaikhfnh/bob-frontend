@@ -1,0 +1,88 @@
+import { motion, useScroll, useTransform } from 'motion/react';
+import { useRef } from 'react';
+import { springs } from '../../styles/motion';
+import { useCountdown } from '../../hooks/useCountdown.js-delete';
+import Button from '../Button';
+import HostBadge from '../HostBadge.jsx-delete';
+import HeroScene from './HeroScene.jsx-delete';
+import AmbientBackground from '../AmbientBackground';
+
+const SESSION_DATE = '2026-08-26T18:00:00+03:00';
+
+function fadeUp(delay = 0) {
+  return { initial: { opacity: 0, y: 24 }, animate: { opacity: 1, y: 0 }, transition: { ...springs.default, delay } };
+}
+
+export default function Hero() {
+  const { days, hours, minutes, seconds } = useCountdown(SESSION_DATE);
+  const sectionRef = useRef(null);
+
+  // scroll-linked motion — the scene drifts as you scroll past, so there's
+  // movement even without touching the mouse at all
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
+  const sceneY = useTransform(scrollYProgress, [0, 1], [0, 60]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.3]);
+
+  return (
+    <section ref={sectionRef} className="relative w-full overflow-hidden bg-white">
+      <AmbientBackground />
+
+      <div className="relative grid w-full items-center gap-10 px-6 py-20 md:grid-cols-2 md:gap-16 md:px-16 md:py-28 lg:px-24 xl:px-32">
+        <motion.div style={{ opacity: textOpacity }}>
+          <motion.p {...fadeUp(0)} className="text-xs font-bold uppercase tracking-wide text-brand-red">
+            Sakan Series · Next Session
+          </motion.p>
+
+          <motion.h1 {...fadeUp(0.05)} className="mt-3 text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-brand-ink md:text-6xl lg:text-7xl">
+            Own Your Home, Understand Every Step
+          </motion.h1>
+
+          <motion.p {...fadeUp(0.1)} className="mt-4 max-w-lg text-base leading-relaxed text-brand-muted md:text-lg">
+            Join Boubyan Bank's Sakan Series and learn how home financing works — from application to key handover.
+          </motion.p>
+
+          <motion.div {...fadeUp(0.15)} className="mt-6 flex flex-wrap gap-2">
+            {['📅 Aug 26, 2026', '🕐 6:00 PM', '📍 Hybrid — Online & In-Person'].map((chip) => (
+              <span key={chip} className="rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-brand-ink">
+                {chip}
+              </span>
+            ))}
+          </motion.div>
+
+          <motion.div {...fadeUp(0.2)} className="mt-6 flex gap-3">
+            {[
+              { label: 'Days', value: days },
+              { label: 'Hrs', value: hours },
+              { label: 'Min', value: minutes },
+              { label: 'Sec', value: seconds },
+            ].map((unit) => (
+              <div key={unit.label} className="flex w-16 flex-col items-center rounded-xl border border-neutral-200 bg-white/70 py-2 backdrop-blur-sm">
+                <span className="text-xl font-bold text-brand-ink">{String(unit.value).padStart(2, '0')}</span>
+                <span className="text-[10px] uppercase text-brand-muted">{unit.label}</span>
+              </div>
+            ))}
+          </motion.div>
+
+          <motion.div {...fadeUp(0.25)} className="mt-7 flex flex-wrap gap-3">
+            <Button variant="primary">Register Now →</Button>
+            <Button variant="outline">See all sessions</Button>
+          </motion.div>
+
+          <div className="mt-7">
+            <HostBadge />
+          </div>
+        </motion.div>
+
+        <motion.div
+          style={{ y: sceneY }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={springs.default}
+          className="flex justify-center md:justify-end"
+        >
+          <HeroScene />
+        </motion.div>
+      </div>
+    </section>
+  );
+}

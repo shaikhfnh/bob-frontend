@@ -1,0 +1,39 @@
+import { motion } from 'motion/react';
+import { springs } from '../../styles/motion';
+import { useInView } from '../../hooks/useInView';
+import { HOSTS } from '../../utils/sessionsData';
+
+export default function Hosts() {
+  const [ref, inView] = useInView();
+
+  return (
+    <section id="hosts" ref={ref} className="w-full bg-white px-6 py-20 md:px-16 md:py-28 lg:px-24">
+      <p className="text-xs font-bold uppercase tracking-wide text-brand-red">Meet Your Hosts</p>
+      <h2 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-brand-ink md:text-4xl">
+        Learn from Boubyan's own specialists
+      </h2>
+
+      <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2">
+        {HOSTS.map((h, i) => (
+          <motion.div
+            key={h.name}
+            initial={{ opacity: 0, y: 24 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...springs.default, delay: i * 0.1 }}
+            className="flex gap-5 rounded-2xl border border-neutral-200 p-6"
+          >
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-red to-brand-red-dark text-lg font-bold text-white">
+              {h.initials}
+            </div>
+            <div>
+              <p className="font-bold text-brand-ink">{h.name}</p>
+              <p className="text-xs font-semibold text-brand-red">{h.role}</p>
+              <p className="mt-2 text-sm text-brand-muted">{h.bio}</p>
+              <p className="mt-2 text-xs text-brand-muted">{h.sessions} sessions · {h.rating}★ rating</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+}
