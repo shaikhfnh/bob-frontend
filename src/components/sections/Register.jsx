@@ -9,12 +9,11 @@ import SessionPicker from '../SessionPicker';
 import KuwaitFlag from '../KuwaitFlag';
 import Toast from '../Toast';
 import Button from '../Button';
-import { logFunnelEvent } from '../../services/funnelService';
+import { logFunnelEvent, logFieldFocus } from '../../services/funnelService';
 import { isValidCivilId } from '../../utils/civilId';
 import ConfirmationModal from '../ConfirmationModal';
 import { useLanguage } from '../../context/LanguageContext';
 import OtpModal from '../OtpModal';
-import { sendOtp } from '../../services/otpService';
 
 const EMPTY_FORM = { firstName: '', lastName: '', phone: '', email: '', civilId: '', sessionId: '', consent: false, housingRegistered: false, housingYear: '' };
 
@@ -28,9 +27,9 @@ export default function Register() {
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [started, setStarted] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
   const { t } = useLanguage();
   const [shake, setShake] = useState(false);
-
 
   useEffect(() => {
     getSessions().then((data) => {
@@ -78,40 +77,35 @@ export default function Register() {
     toastTimer = setTimeout(() => setToast((t) => ({ ...t, show: false })), 5000);
   }
 
-async function handleSubmit(e) {
-  e.preventDefault();
-  setSubmitError('');
-  if (!validate()) {
-    setShake(true);
-    setTimeout(() => setShake(false), 400);
-    return;
+  // TEST MODE: no real OTP email is sent — this just validates the form,
+  // then shows the OTP screen so the flow still demos visually. Any 6
+  // digits typed into that screen proceeds straight to real registration.
+  function handleSubmit(e) {
+    e.preventDefault();
+    setSubmitError('');
+    if (!validate()) {
+      setShake(true);
+      setTimeout(() => setShake(false), 400);
+      return;
+    }
+    setShowOtp(true);
   }
-  setSubmitting(true);
-  try {
-    await submitRegistration(form);
-    logFunnelEvent('registration_completed', form.sessionId);
-    const keepSessionId = form.sessionId;
-    setForm({ ...EMPTY_FORM, sessionId: keepSessionId });
-    setShowConfirmation(true);
-  } catch (err) {
-    showToast(err.message, 'error');
-  } finally {
-    setSubmitting(false);
-  }
-}
 
-async function handleOtpVerified() {
-  setShowOtp(false);
-  try {
-    await submitRegistration(form);
-    logFunnelEvent('registration_completed', form.sessionId);
-    const keepSessionId = form.sessionId;
-    setForm({ ...EMPTY_FORM, sessionId: keepSessionId });
-    setShowConfirmation(true);
-  } catch (err) {
-    showToast(err.message, 'error');
+  async function handleOtpVerified() {
+    setShowOtp(false);
+    setSubmitting(true);
+    try {
+      await submitRegistration(form);
+      logFunnelEvent('registration_completed', form.sessionId);
+      const keepSessionId = form.sessionId;
+      setForm({ ...EMPTY_FORM, sessionId: keepSessionId });
+      setShowConfirmation(true);
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSubmitting(false);
+    }
   }
-}
 
   return (
     <section id="register" ref={ref} className="w-full bg-white px-6 py-20 md:px-16 md:py-28 lg:px-24">
@@ -153,7 +147,7 @@ async function handleOtpVerified() {
         <div className="p-10">
           <form onSubmit={handleSubmit} noValidate className="space-y-3.5">
             <div className="flex gap-3">
-              <FloatingInput onFocus={() => logFieldFocus('firstName')} className="flex-1 min-w-0" label={t('register.firstName')} required value={form.firstName} onChange={(e) => update('firstName', e.target.value)} onFocus={markStarted} error={errors.firstName} />
+              <FloatingInput className="flex-1 min-w-0" label={t('register.firstName')} required value={form.firstName} onChange={(e) => update('firstName', e.target.value)} onFocus={() => { markStarted(); logFieldFocus('firstName'); }} error={errors.firstName} />
               <FloatingInput onFocus={() => logFieldFocus('lastName')} className="flex-1 min-w-0" label={t('register.lastName')} value={form.lastName} onChange={(e) => update('lastName', e.target.value)} />
             </div>
 
@@ -264,7 +258,7 @@ async function handleOtpVerified() {
       </motion.div>
 
       <ConfirmationModal open={showConfirmation} onClose={() => setShowConfirmation(false)} />
-        {/* <OtpModal open={showOtp} email={form.email} onVerified={handleOtpVerified} onClose={() => setShowOtp(false)} /> */}
+      <OtpModal open={showOtp} email={form.email} onVerified={handleOtpVerified} onClose={() => setShowOtp(false)} />
       <Toast show={toast.show} message={toast.message} type={toast.type} />
     </section>
   );
