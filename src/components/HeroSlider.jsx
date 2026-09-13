@@ -1,20 +1,38 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'motion/react';
 import { springs } from '../styles/motion';
+import Desktopfirstslide from '../assets/images/HeroSlider/desktop1.png';
+import Desktopsecondslide from '../assets/images/HeroSlider/desktop2.png';
+import Desktopthirdslide from '../assets/images/HeroSlider/desktop3.png';
+import Desktopfourthslide from '../assets/images/HeroSlider/desktop4.png';
+import Mobilefirstslide from '../assets/images/HeroSlider/mobile1.png';
+import Mobilesecondslide from '../assets/images/HeroSlider/mobile2.png';
+import Mobilethirdslide from '../assets/images/HeroSlider/mobile3.png';
+import Mobilefourthslide from '../assets/images/HeroSlider/mobile4.png';
 
 const SLIDES = [
- 
+  {
+    id: 1,
+    desktopImage: Desktopfirstslide,
+    mobileImage: Mobilefirstslide,
+  },
   {
     id: 2,
-    desktopImage: 'https://www.mamababyexpo.com/wp-content/uploads/2026/09/Artboard-1.png',
-    mobileImage: 'https://www.mamababyexpo.com/wp-content/uploads/2026/09/Artboard-2.png',
+    desktopImage: Desktopsecondslide,
+    mobileImage: Mobilesecondslide,
   },
   {
     id: 3,
-    desktopImage: 'https://www.mamababyexpo.com/wp-content/uploads/2026/09/Artboard-3.png',
-    mobileImage: 'https://www.mamababyexpo.com/wp-content/uploads/2026/09/Artboard-2-copy-2.png',
+    desktopImage: Desktopthirdslide,
+    mobileImage: Mobilethirdslide,
+  },
+  {
+    id: 4,
+    desktopImage: Desktopfourthslide,
+    mobileImage: Mobilefourthslide,
   },
 ];
+
 
 const AUTOPLAY_MS = 6000;
 const SWIPE_THRESHOLD = 80;

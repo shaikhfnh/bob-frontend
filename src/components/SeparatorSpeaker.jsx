@@ -3,8 +3,8 @@ import { motion } from 'motion/react';
 import { useInView } from '../hooks/useInView';
 import { springs } from '../styles/motion';
 import { useLanguage } from '../context/LanguageContext';
-import bannerDesktop from '../assets/images/speaker-banner-desktop.webp';
-import bannerMobile from '../assets/images/speaker-banner-mobile.png';
+import bannerDesktop from '../assets/images/banner/speaker-banner-desktop.png';
+import bannerMobile from '../assets/images/banner/speaker-banner-mobile.png';
 
 function useCountUp(target, active) {
   const [value, setValue] = useState(0);
