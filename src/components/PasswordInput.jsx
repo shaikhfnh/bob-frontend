@@ -11,7 +11,7 @@ export default function PasswordInput({ value, onChange, placeholder = 'Password
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-white/40 bg-white/50 px-3 py-2.5 pr-10 text-sm backdrop-blur-sm placeholder:text-neutral-500 focus:border-brand-red focus:bg-white/70 focus:outline-none"
+        className="w-full rounded-lg border border-neutral-300 bg-white/50 px-3 py-2.5 pr-10 text-sm backdrop-blur-sm placeholder:text-neutral-500 focus:border-brand-red focus:bg-white/70 focus:outline-none"
         {...props}
       />
       <motion.button

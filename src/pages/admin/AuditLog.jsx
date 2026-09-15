@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DataTable from '../../components/DataTable';
 import { getAuditLog } from '../../services/auditService';
 import { getUsers } from '../../services/userService';
 import AuditDetailModal from '../../components/AuditDetailModal';
@@ -25,9 +26,7 @@ export default function AuditLog() {
   const [viewingDetail, setViewingDetail] = useState(null);
   const [viewingUser, setViewingUser] = useState(null);
 
-  function refresh() {
-    getUsers().then(setUsers).catch(() => {});
-  }
+  function refresh() { getUsers().then(setUsers).catch(() => {}); }
 
   useEffect(() => {
     Promise.all([getAuditLog(), getUsers()])
@@ -37,62 +36,57 @@ export default function AuditLog() {
   }, []);
 
   function getCivilId(entry) {
-    try {
-      const details = JSON.parse(entry.details || '{}');
-      return details._civilId || entry.target_id;
-    } catch {
-      return entry.target_id;
-    }
+    try { return JSON.parse(entry.details || '{}')._civilId || entry.target_id; } catch { return entry.target_id; }
   }
 
-  function handleNameClick(entry) {
-    const civilId = getCivilId(entry);
-    const match = users.find((u) => u.civil_id === civilId);
-    if (match) setViewingUser(match);
-  }
+  const columns = [
+    {
+      key: 'action',
+      label: 'Action',
+      render: (e) => ACTION_LABELS[e.action] || e.action,
+    },
+    {
+      key: 'target_name',
+      label: 'Target',
+      render: (e) => {
+        const civilId = getCivilId(e);
+        const match = users.find((u) => u.civil_id === civilId);
+        const name = e.target_name || `${e.target_type} #${e.target_id}`;
+        return match ? (
+          <button onClick={(ev) => { ev.stopPropagation(); setViewingUser(match); }} className="font-semibold text-brand-red underline hover:no-underline">
+            {name}
+          </button>
+        ) : name;
+      },
+    },
+    { key: 'admin_email', label: 'Admin' },
+    { key: 'created_at', label: 'When', render: (e) => fmtDate(e.created_at), exportValue: (e) => new Date(e.created_at).toISOString() },
+  ];
 
   return (
     <div>
       <h1 className="text-xl font-bold text-brand-ink">Audit Log</h1>
-      <p className="mb-5 text-sm text-brand-muted">Every admin action, most recent first</p>
+      <p className="mb-5 text-sm text-brand-muted">Every admin action, searchable and filterable</p>
 
-      {loading && <p className="text-sm text-brand-muted">Loading...</p>}
-      {error && <p className="text-sm font-medium text-red-600">⚠ {error}</p>}
-
-      {!loading && !error && (
-        <div className="space-y-2">
-          {log.length === 0 && <p className="text-sm text-brand-muted">No admin actions recorded yet.</p>}
-          {log.map((entry) => {
-            const canOpenProfile = (entry.target_type === 'registrant' || entry.target_type === 'user') && users.some((u) => u.civil_id === getCivilId(entry));
-            return (
-              <div
-                key={entry.id}
-                className="flex w-full items-center justify-between rounded-xl border border-neutral-200 p-4 transition-all hover:shadow-sm"
-              >
-                <button onClick={() => setViewingDetail(entry)} className="flex-1 text-left">
-                  <p className="text-sm font-semibold text-brand-ink">
-                    {ACTION_LABELS[entry.action] || entry.action}
-                  </p>
-                  <p className="text-xs text-brand-muted">
-                    by {entry.admin_email} ·{' '}
-                    {canOpenProfile ? (
-                      <span
-                        onClick={(e) => { e.stopPropagation(); handleNameClick(entry); }}
-                        className="font-semibold text-brand-red underline hover:no-underline"
-                      >
-                        {entry.target_name || `${entry.target_type} #${entry.target_id}`}
-                      </span>
-                    ) : (
-                      entry.target_name || `${entry.target_type} #${entry.target_id}`
-                    )}
-                  </p>
-                </button>
-                <span className="flex-shrink-0 text-xs text-brand-muted">{fmtDate(entry.created_at)}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <DataTable
+        data={log}
+        columns={columns}
+        searchKeys={['admin_email', 'target_name', 'action']}
+        filters={[{
+          key: 'action',
+          options: [
+            { value: 'all', label: 'All' },
+            { value: 'edit_booking', label: 'Edited Bookings' },
+            { value: 'cancel_booking', label: 'Cancellations' },
+            { value: 'edit_user', label: 'User Edits' },
+            { value: 'edit_session', label: 'Session Edits' },
+          ],
+        }]}
+        exportFilename="audit-log"
+        loading={loading}
+        error={error}
+        onRowClick={(entry) => setViewingDetail(entry)}
+      />
 
       <AuditDetailModal entry={viewingDetail} open={!!viewingDetail} onClose={() => setViewingDetail(null)} />
       <UserProfileModal user={viewingUser} open={!!viewingUser} onClose={() => setViewingUser(null)} onSaved={refresh} />

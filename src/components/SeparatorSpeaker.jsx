@@ -44,9 +44,10 @@ export default function SeparatorSpeaker() {
   const count = useCountUp(12, inView);
 
   return (
-    <section ref={ref} className="w-full bg-white">
+    <section  ref={ref} className="w-full bg-white">
       <div className="mx-auto max-w-3xl px-6 pt-16 text-center md:pt-20">
         <motion.p
+        id='sessions'
           initial={{ opacity: 0, y: 12 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={springs.default}
@@ -65,12 +66,13 @@ export default function SeparatorSpeaker() {
       </div>
 
       <motion.div
+      
         initial={{ opacity: 0, y: 16 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ ...springs.default, delay: 0.2 }}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
-        className="mx-auto mt-10 w-full px-4 pb-16 sm:px-6 md:pb-20"
+        className="mx-auto mt-10 w-full px-4 pb-10 sm:px-6 "
       >
         <div className="overflow-hidden rounded-3xl shadow-sm md:mx-20">
           <picture>

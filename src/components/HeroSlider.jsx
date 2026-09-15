@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'motion/react';
 import { springs } from '../styles/motion';
 import Desktopfirstslide from '../assets/images/HeroSlider/desktop1.png';
@@ -11,28 +11,11 @@ import Mobilethirdslide from '../assets/images/HeroSlider/mobile3.png';
 import Mobilefourthslide from '../assets/images/HeroSlider/mobile4.png';
 
 const SLIDES = [
-  {
-    id: 1,
-    desktopImage: Desktopfirstslide,
-    mobileImage: Mobilefirstslide,
-  },
-  {
-    id: 2,
-    desktopImage: Desktopsecondslide,
-    mobileImage: Mobilesecondslide,
-  },
-  {
-    id: 3,
-    desktopImage: Desktopthirdslide,
-    mobileImage: Mobilethirdslide,
-  },
-  {
-    id: 4,
-    desktopImage: Desktopfourthslide,
-    mobileImage: Mobilefourthslide,
-  },
+  { id: 1, desktopImage: Desktopfirstslide, mobileImage: Mobilefirstslide },
+  { id: 2, desktopImage: Desktopsecondslide, mobileImage: Mobilesecondslide },
+  { id: 3, desktopImage: Desktopthirdslide, mobileImage: Mobilethirdslide },
+  { id: 4, desktopImage: Desktopfourthslide, mobileImage: Mobilefourthslide },
 ];
-
 
 const AUTOPLAY_MS = 6000;
 const SWIPE_THRESHOLD = 80;
@@ -42,8 +25,23 @@ export default function HeroSlider() {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [paused, setPaused] = useState(false);
+  const [inView, setInView] = useState(true);
   const dragX = useMotionValue(0);
   const timerRef = useRef(null);
+  const sectionRef = useRef(null);
+
+  // Performance fix: stop autoplaying (and the decode/paint work that comes
+  // with each slide change) once this section scrolls out of view.
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   function goTo(newIndex, dir) {
     setDirection(dir);
@@ -55,11 +53,15 @@ export default function HeroSlider() {
 
   function resetAutoplay() {
     clearInterval(timerRef.current);
-    if (!paused) {
+    if (!paused && inView) {
       timerRef.current = setInterval(() => setIndex((i) => (i + 1) % SLIDES.length), AUTOPLAY_MS);
     }
   }
-  useState(() => { resetAutoplay(); return () => clearInterval(timerRef.current); });
+
+  useEffect(() => {
+    resetAutoplay();
+    return () => clearInterval(timerRef.current);
+  }, [paused, inView]);
 
   function handleDragEnd(e, info) {
     const { offset, velocity } = info;
@@ -73,9 +75,10 @@ export default function HeroSlider() {
 
   return (
     <div
+      ref={sectionRef}
       className="group relative w-full overflow-hidden bg-neutral-900 aspect-[4/5] md:aspect-[21/9]"
       onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => { setPaused(false); resetAutoplay(); }}
+      onMouseLeave={() => setPaused(false)}
     >
       <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
@@ -96,15 +99,12 @@ export default function HeroSlider() {
             <picture>
               <source media="(min-width: 768px)" srcSet={slide.desktopImage} />
               <img
-              draggable={false}
+                draggable={false}
                 src={slide.mobileImage}
                 alt=""
-                // object-contain = the WHOLE image always shows, both
-                // dimensions, no cropping at all. If the shape doesn't
-                // perfectly match the container, the gap shows the
-                // background color instead of cutting anything off.
                 className="h-full w-full object-cover"
                 loading={index === 0 ? 'eager' : 'lazy'}
+                fetchPriority={index === 0 ? 'high' : 'auto'}
               />
             </picture>
           </motion.div>

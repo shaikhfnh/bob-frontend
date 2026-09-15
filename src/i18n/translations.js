@@ -3,6 +3,7 @@ export const translations = {
     home: { en: 'Home', ar: 'الرئيسية' },
     about: { en: 'About', ar: 'نبذة' },
     sessions: { en: 'Sessions', ar: 'الجلسات' },
+    
     hosts: { en: 'Hosts', ar: 'المتحدثون' },
     register: { en: 'Register', ar: 'سجّل' },
   },

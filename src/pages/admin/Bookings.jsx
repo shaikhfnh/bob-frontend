@@ -88,6 +88,15 @@ export default function Bookings() {
         ),
       exportValue: (b) => (b.housing_authority_registered ? `Yes (${b.housing_authority_year || 'year unknown'})` : 'No'),
     },
+    {
+  key: 'status',
+  label: 'Status',
+  render: (b) => b.status === 'waitlisted' ? (
+    <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-700">⏳ Waitlisted</span>
+  ) : (
+    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">✓ Confirmed</span>
+  ),
+},
     { key: 'created_at', label: 'Booked', render: (b) => fmtDate(b.created_at), exportValue: (b) => new Date(b.created_at).toISOString() },
     {
       key: 'actions',

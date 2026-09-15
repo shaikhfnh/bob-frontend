@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { springs } from '../../styles/motion';
 import { useAuth } from '../../context/AuthContext';
@@ -14,12 +14,16 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [shake, setShake] = useState(false);
   const emailRef = useRef(null);
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     emailRef.current?.focus();
   }, []);
+
+  if (isAuthenticated) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -40,8 +44,6 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left panel — brand identity, restrained. One deep color, one
-          confident wordmark, one quiet ambient glow. Hidden on mobile. */}
       <div className="relative hidden w-[45%] flex-col justify-between overflow-hidden bg-neutral-900 p-12 lg:flex">
         <div className="pointer-events-none absolute inset-0">
           <motion.div
@@ -70,7 +72,6 @@ export default function Login() {
         <p className="relative text-xs text-white/30">© 2026 Boubyan Bank. Admin Console.</p>
       </div>
 
-      {/* Right panel — the actual form, clean and unhurried */}
       <div className="flex flex-1 items-center justify-center bg-white px-6 py-16">
         <motion.form
           initial={{ opacity: 0, y: 16 }}
@@ -83,7 +84,6 @@ export default function Login() {
           onSubmit={handleSubmit}
           className="w-full max-w-sm"
         >
-          {/* Mobile-only brand mark, since the left panel is hidden below lg */}
           <div className="mb-8 flex items-center gap-2.5 lg:hidden">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-red text-sm font-bold text-white">B</div>
             <span className="text-sm font-semibold text-brand-ink">Boubyan</span>
@@ -102,7 +102,7 @@ export default function Login() {
                 placeholder="you@boubyan.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-neutral-300 px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-neutral-400 focus:border-brand-red focus:outline-none focus:ring-1 focus:ring-brand-red/20"
+                className="w-full rounded-lg border border-neutral-300 px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-neutral-400 transition-colors focus:border-brand-red focus:outline-none focus:ring-1 focus:ring-brand-red/20"
               />
             </div>
 
@@ -111,20 +111,20 @@ export default function Login() {
               <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
 
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex cursor-pointer items-center gap-2 text-xs text-brand-muted">
+            <label className="flex cursor-pointer items-center justify-between rounded-lg bg-neutral-50 px-3.5 py-3 transition-colors hover:bg-neutral-100">
+              <div className="flex items-center gap-2.5">
                 <input
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
-                  className="h-3.5 w-3.5 rounded border-neutral-300 accent-brand-red"
+                  className="h-4 w-4 rounded  border-neutral-300 accent-brand-red"
                 />
-                Remember me
-              </label>
-              <a href="mailto:sakan@boubyan.com" className="text-xs font-medium text-brand-red hover:underline">
-                Forgot password?
-              </a>
-            </div>
+                <span className="text-sm font-medium text-brand-ink">Stay signed in</span>
+              </div>
+              <span className="text-[11px] text-brand-muted">
+                {remember ? 'Remember me' : 'This session only'}
+              </span>
+            </label>
 
             {error && (
               <motion.p

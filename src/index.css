@@ -8,3 +8,23 @@
 
   --font-display: system-ui, -apple-system, sans-serif;
 }
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Every section that's a scroll target needs this so smooth-scroll stops
+   BELOW the sticky header, not hidden underneath it. 80px = header height
+   (64px) + a little breathing room. */
+#about,
+#sessions,
+#hosts,
+#register,
+#faq {
+  scroll-margin-top: 80px;
+}

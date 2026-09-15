@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Header from './layouts/Header';
 import Footer from './layouts/Footer';
@@ -21,6 +21,7 @@ import { useClickTracker } from './hooks/useClickTracker';
 import { logFunnelEvent } from './services/funnelService';
 import SeparatorSpeaker from './components/SeparatorSpeaker';
 import AuditLog from './pages/admin/AuditLog';
+import NotFound from './components/NotFound';
 
 function PublicSite() {
   useEffect(() => {
@@ -50,6 +51,7 @@ function PublicSite() {
     </div>
   );
 }
+
 function Protected({ children }) {
   return (
     <ProtectedRoute>
@@ -62,6 +64,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<PublicSite />} />
+      <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
       <Route path="/admin/login" element={<Login />} />
       <Route path="/admin/dashboard" element={<Protected><Dashboard /></Protected>} />
       <Route path="/admin/bookings" element={<Protected><Bookings /></Protected>} />
@@ -70,6 +73,7 @@ function App() {
       <Route path="/admin/analytics" element={<Protected><Analytics /></Protected>} />
       <Route path="/admin/notifications" element={<Protected><Notifications /></Protected>} />
       <Route path="/admin/audit" element={<Protected><AuditLog /></Protected>} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
